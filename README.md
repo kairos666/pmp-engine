@@ -197,8 +197,8 @@ $('script[src$="bootstrap.min.js"]').remove();
 
 ## Limitations
 * need some tests certainly some weird behaviors now and then :hear_no_evil:
-* cross domains problems when dealing with https sites. Not really any software solution here this baked in security for any browser may be bypassed by extensions such has [this one](https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi?utm_source=chrome-app-launcher-info-dialog)
-* because the modifications are applied on the fly in the HTML page request, it will work only with good ol' full server rendered pages. Having the same level of control on SPA or ajax content need some reverse engineeringat best, or is plain impossible.
+* cross domains problems when dealing with https sites. This is baked in security for any browser, may be bypassed by extensions such has [this one](https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi?utm_source=chrome-app-launcher-info-dialog) ... beware this is dangerous :bangbang:
+* because the modifications are applied on the fly in the HTML page request, it will work only with good ol' full server rendered pages. Pimping SPAs or ajax content need some reverse engineering at best, or is plain impossible.
 
 ## future features
 - [ ] test coverage
