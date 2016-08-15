@@ -88,7 +88,7 @@ property | values
 url | the exact URL or trigger [pattern](https://github.com/bjoerge/route-pattern) that will activate the following operations [String]
 modifs | Array of [jQuery operations](https://github.com/cheeriojs/cheerio) to manipulate the HTML request response [Array[String]]
 
-**imoprtant** Please notice that all commands samples are multiline strings. Multiline strings are the most practical to use (check the example below).
+**important** Please notice that all commands samples are multiline strings. Multiline strings are the most practical to use (check the example below).
 
 ```javascript
 //mutliline case
@@ -169,30 +169,36 @@ modifs:[`
 ```
 define your own helper functions to manage HTML partials injections
 ```javascript
-var injectHTMLFile = function(url){
-    try {
-        return fs.readFileSync(path.join('./dist/html', url), 'utf8');
-    } catch (err) {
-        // If the type is not missing file, then just throw the error again.
-        if (err.code !== 'ENOENT') throw err;
+modifs:[`
+    var injectHTMLFile = function(url){
+        try {
+            return fs.readFileSync(path.join('./dist/html', url), 'utf8');
+        } catch (err) {
+            // If the type is not missing file, then just throw the error again.
+            if (err.code !== 'ENOENT') throw err;
 
-        // Handle a file-not-found error
-        return '<p class="alert alert-warning">HTML inject file not found: ' + url + '</p>';
+            // Handle a file-not-found error
+            return '<p class="alert alert-warning">HTML inject file not found: ' + url + '</p>';
+        }
     }
-}
 
-//inject HTML partial to the DOM from 'dist/html'
-$('.Article-content').prepend(injectHTMLFile('my-article-summary-to-be-injected.html'));
+    //inject HTML partial to the DOM from 'dist/html'
+    $('.Article-content').prepend(injectHTMLFile('my-article-summary-to-be-injected.html'));
+`]
 ```
 ### remove stylesheets
 ```javascript
-//find and remove the external stylesheet for bootstrap minified css
-$('link[href$="bootstrap.min.css"]').remove();
+modifs:[`
+    //find and remove the external stylesheet for bootstrap minified css
+    $('link[href$="bootstrap.min.css"]').remove();
+`]
 ```
 ### remove scripts
 ```javascript
-//find and remove the external script for bootstrap minified js
-$('script[src$="bootstrap.min.js"]').remove();
+modifs:[`
+    //find and remove the external script for bootstrap minified js
+    $('script[src$="bootstrap.min.js"]').remove();
+`]
 ```
 
 ## Limitations
