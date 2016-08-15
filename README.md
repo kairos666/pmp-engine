@@ -10,7 +10,7 @@ The engine leverage the mighty [BrowserSync](https://www.browsersync.io/) to all
 The trick is quite simple, some URL (ex: http://www.thetimes.co.uk/) is being proxyfied with BrowserSync, it is then available through something along the lines of *localhost:3000*.
 Nothing special, but now we have the opportunity to add some middleware. This middleware is the corner stone of all **"pimping"** we gonna apply to the Times website pages.
 
-Basically what it does is detect all HTML responses matching with a whitelist of URL patterns (ex:"\*magazine/style/\*"). When one such URL request is identified for pimping, the middleware will change the response according to a set of jQuery instructions: add some HTML there, remove this style tag, append a new stylesheet...
+Basically what it does is detect all HTML responses matching with a whitelist of URL patterns (ex:"\*/magazine/\*"). When one such URL request is identified for pimping, the middleware will change the response according to a set of jQuery instructions: add some HTML there, remove this style tag, append a new stylesheet...
 
 This core behavior is then bundled with some [gulp](http://gulpjs.com/) automated build tasks goodness to provide external page assets (e.g. stylesheets, js, HTML partials, images).
 
@@ -50,7 +50,7 @@ let config = {
     },
     pimpCmds:[
         { 
-            url:'*magazine/style/*',
+            url:'*/magazine/*',
             modifs:[`
                 $('head').append('<link rel="stylesheet" type="text/css" href="/css/main.min.css">');
                 $('body').append('<script type="text/javascript" src="/js/main.min.js"></script>');
@@ -59,7 +59,7 @@ let config = {
             `] 
         },
         { 
-            url:'*edition/style/*',
+            url:'*/edition/*',
             modifs:[`
                 $('head').append('<link rel="stylesheet" type="text/css" href="/css/main.min.css">');
                 $('body').append('<script type="text/javascript" src="/js/main.min.js"></script>');
@@ -88,6 +88,27 @@ property | values
 url | the exact URL or trigger [pattern](https://github.com/bjoerge/route-pattern) that will activate the following operations [String]
 modifs | Array of [jQuery operations](https://github.com/cheeriojs/cheerio) to manipulate the HTML request response [Array[String]]
 
+**imoprtant** Please notice that all commands samples are multiline strings. Multiline strings are the most practical to use (check the example below).
+
+```javascript
+//mutliline case
+modifs:[`
+    $('head').append('<link rel="stylesheet" type="text/css" href="/css/main.min.css">');
+    $('body').append('<script type="text/javascript" src="/js/main.min.js"></script>');
+    $('body').addClass('sample-pimping');
+`]
+
+//normal quotes, all inline case
+modifs:["$('head').append('<link rel=\"stylesheet\" type=\"text/css\" href=\"/css/main.min.css\">'); $('body').append('<script type=\"text/javascript\" src=\"/js/main.min.js\"></script>'); $('body').addClass('sample-pimping');"]
+
+//normal quotes, one action per array item
+modifs:[
+    "$('head').append('<link rel=\"stylesheet\" type=\"text/css\" href=\"/css/main.min.css\">');",
+    "$('body').append('<script type=\"text/javascript\" src=\"/js/main.min.js\"></script>');",
+    "$('body').addClass('sample-pimping');"
+]
+```
+
 ## Usage
 After init, the engine can be started, stopped or restarted.
 ```javascript
@@ -105,16 +126,81 @@ pmpEngine.stop();
 ```
 
 ## Examples
+In the pimpCmd Object there is a set of operations that will allow you to perform some actions on the request's HTML payload.
+You are free to do whatever DOM transformation you see fit. [Cheerio's jQuery light](https://github.com/cheeriojs/cheerio) library is provided to ease the process. And don't worry this helper jQuery only exists in the context of the middleware, it will not pollute the resulting pimped page.
 ### add styles
-soon
+append a new external stylesheet from your local files. The href path root correspond to the *dist* folder in your project.
+```javascript
+modifs:[`
+    $('head').append('<link rel="stylesheet" type="text/css" href="/css/main.min.css">');
+`] 
+```
+alternatively you could add a style tag directly
+```javascript
+modifs:[`
+    $('head').append('<style>body { background-color:limegreen; color:goldenrod; }</style>');
+`] 
+```
 ### add JS
-soon
+same principle to add some external javascript files for execution. Works also with inline `<script>` tags.
+```javascript
+modifs:[`
+    $('body').append('<script type="text/javascript" src="/js/main.min.js"></script>');
+`] 
+```
+```javascript
+modifs:[`
+    $('head').append('<script>alert('hello world!');</script>');
+`] 
+```
 ### add/modify/remove the page's HTML
-soon
+just regular javascript/jQuery manipulations. 
+```javascript
+modifs:[`
+    //remove all paragraphs
+    $('body p').remove();
+
+    //deactivate links and replace links texts
+    $('body a').attr('href', '#').html('hello i\'m a link');
+
+    //add an image (from publicly available CDN) to the fifth paragraph in article content
+    $('.Article-content p:eq(5)').prepend('<img width="100%" src="http://i223.photobucket.com/albums/dd245/2ndsite/The%20Holding%20Pen/6f158ba2.jpg" />');
+`] 
+```
+define your own helper functions to manage HTML partials injections
+```javascript
+var injectHTMLFile = function(url){
+    try {
+        return fs.readFileSync(path.join('./dist/html', url), 'utf8');
+    } catch (err) {
+        // If the type is not missing file, then just throw the error again.
+        if (err.code !== 'ENOENT') throw err;
+
+        // Handle a file-not-found error
+        return '<p class="alert alert-warning">HTML inject file not found: ' + url + '</p>';
+    }
+}
+
+//inject HTML partial to the DOM from 'dist/html'
+$('.Article-content').prepend(injectHTMLFile('my-article-summary-to-be-injected.html'));
+```
 ### remove stylesheets
-soon
+```javascript
+//find and remove the external stylesheet for bootstrap minified css
+$('link[href$="bootstrap.min.css"]').remove();
+```
 ### remove scripts
-soon
+```javascript
+//find and remove the external script for bootstrap minified js
+$('script[src$="bootstrap.min.js"]').remove();
+```
 
 ## Limitations
-soon
+* need some tests certainly some weird behaviors now and then :hear_no_evil:
+* cross domains problems when dealing with https sites. Not really any software solution here this baked in security for any browser may be bypassed by extensions such has [this one](https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi?utm_source=chrome-app-launcher-info-dialog)
+* because the modifications are applied on the fly in the HTML page request, it will work only with good ol' full server rendered pages. Having the same level of control on SPA or ajax content need some reverse engineeringat best, or is plain impossible.
+
+## future features
+- [ ] test coverage
+- [ ] plugin system to import DOM manipulation helper functions to power-up the pimpCmds (ex:injectHTML function)
+- [ ] GUI to make pmp-engine usage a breeze
