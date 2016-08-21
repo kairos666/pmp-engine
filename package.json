@@ -1,6 +1,6 @@
 {
   "name": "pmp-engine",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Pimp My Page BrowserSync based web mod engine",
   "main": "index.js",
   "scripts": {
