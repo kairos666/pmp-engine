@@ -3,7 +3,7 @@
 const sinon                 = require('sinon');
 const PmpEngine             = require('../index');
 const basePimpConfig        = require('./assets/test-configs').basePimpCommands;
-const errPimpConfig         = require('./assets/test-configs').errPimpCommands
+const errPimpConfig         = require('./assets/test-configs').errPimpCommands;
 const configs               = require('../engine/configs');
 const hasAnsi               = require('has-ansi');
 
@@ -40,7 +40,7 @@ describe('PmpEngine API methods & properties existence', function() {
         expect(pmpEngine.pmpEngineErrorsStream).to.exist;
     });
 });
-describe('PmpEngine START method', function() {
+describe.skip('PmpEngine START method', function() {
     let pmpEngine;
 
     beforeEach(function() {
@@ -90,7 +90,7 @@ describe('PmpEngine START method', function() {
         expect(pmpEngine.start(basePimpConfig)).to.equal(true);
     }).timeout(20000);
 });
-describe('PmpEngine STOP & RESTART methods', function() {
+describe.skip('PmpEngine STOP & RESTART methods', function() {
     let pmpEngine;
 
     beforeEach(function(done) {
@@ -174,7 +174,7 @@ describe('PmpEngine STOP & RESTART methods', function() {
         expect(pmpEngine.restart()).to.equal(true);
     }).timeout(20000);
 });
-describe('PmpEngine pmpEngineLogsStream Observable', function() {
+describe.skip('PmpEngine pmpEngineLogsStream Observable', function() {
     let pmpEngine;
 
     beforeEach(function() {
@@ -199,7 +199,7 @@ describe('PmpEngine pmpEngineLogsStream Observable', function() {
         pmpEngine.start(basePimpConfig, ['--no-browser-tab']);
     }).timeout(20000);
 });
-describe('PmpEngine pmpEngineErrorsStream Observable', function() {
+describe.skip('PmpEngine pmpEngineErrorsStream Observable', function() {
     let pmpEngine;
 
     beforeEach(function() {

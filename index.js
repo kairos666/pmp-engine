@@ -25,8 +25,13 @@ class PmpEngine {
 
         //handle socket server enabled PmpEngine
         if(this._options.ioEnabled) {
+
+            //init socket server
             const SocketServer = require('./socket-serving/io').SocketServer;
             this._socketServer = new SocketServer(this, this._options.ioServerConfig);
+
+            //react to external inputs (outputs are already piped)
+            this._socketServer.inputStream.subscribe(socketInputActions.bind(this));
         }
     }
 
@@ -60,6 +65,10 @@ class PmpEngine {
         return this._status.value;
     }
 
+    get currentPimpConfig() {
+        return Object.assign({}, this._pimpCommandsConfig);
+    }
+
     /* observables */
     //status
     get pmpEngineStatusStream() {
@@ -72,6 +81,20 @@ class PmpEngine {
     //errors
     get pmpEngineErrorsStream() {
         return this._hellSpawn.errorStream;
+    }
+}
+
+const socketInputActions = function(input) {
+    switch(input.subType) {
+        case 'start-command': this.start(input.payload); break;
+        case 'stop-command': this.stop(); break;
+        case 'restart-command': this.restart(input.payload); break;
+        case 'config-command': 
+            console.log('TODO handle socket calls to config' + this.currentPimpConfig);
+        break;
+
+        default:
+            console.log('pmpEngine received unknown command ' + input);
     }
 }
 
