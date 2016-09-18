@@ -1,3 +1,5 @@
+# doc below is related to 1.0.3 --> will be updated soon
+
 # pmp-engine
 Ever wanted to experiment on and customize a webpage ? The **Pimp my page engine** let's you do just that.
 The engine leverage the mighty [BrowserSync](https://www.browsersync.io/) to allow full HTML, CSS or JS modifications on any webpage. 
@@ -207,6 +209,7 @@ modifs:[`
 * because the modifications are applied on the fly in the HTML page request, it will work only with good ol' full server rendered pages. Pimping SPAs or ajax content need some reverse engineering at best, or is plain impossible.
 
 ## future features
-- [ ] test coverage
+- [x] test coverage (v2.0.0)
+- [x] socket server to remotely control pmp-engine (v2.0.0)
 - [ ] plugin system to import DOM manipulation helper functions to power-up the pimpCmds (ex:injectHTML function)
 - [ ] GUI to make pmp-engine usage a breeze
