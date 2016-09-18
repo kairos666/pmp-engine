@@ -13,21 +13,21 @@ class PmpEngine {
         this._hellSpawn             = new SpawnWatch({ ipc:true });
         this._socketServer          = null;
         this._pimpCommandsConfig    = null;
-        // this._options               = {
-        //     ioEnabled:false,
-        //     ioServerConfig:defaultIoConfig 
-        // };
+        this._options               = {
+            ioEnabled:false,
+            ioServerConfig:defaultIoConfig 
+        };
 
-        // //options settings (io socket serving)
-        // if(options) {
-        //     this._options = Object.assign(this._options, options);
-        // }
+        //options settings (io socket serving)
+        if(options) {
+            this._options = Object.assign(this._options, options);
+        }
 
-        // //handle socket server enabled PmpEngine
-        // if(this._options.ioEnabled) {
-        //     const SocketServer = require('./socket-serving/io').SocketServer;
-        //     this._socketServer = new SocketServer(this, this._options.ioServerConfig);
-        // }
+        //handle socket server enabled PmpEngine
+        if(this._options.ioEnabled) {
+            const SocketServer = require('./socket-serving/io').SocketServer;
+            this._socketServer = new SocketServer(this, this._options.ioServerConfig);
+        }
     }
 
     //launch pmpEngine
