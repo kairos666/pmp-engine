@@ -1,11 +1,11 @@
 {
   "name": "pmp-engine",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Pimp My Page BrowserSync based web mod engine",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test --require test/chai.js --reporter spec"
   },
   "author": "David Maggi <musashi.miyamoto81@gmail.com>",
   "license": "MIT",
@@ -15,32 +15,17 @@
     "url": "https://github.com/kairos666/pmp-engine.git"
   },
   "dependencies": {
-    "babel-preset-es2015": "^6.6.0",
-    "babel-preset-react": "^6.5.0",
-    "browser-sync": "^2.11.2",
     "chalk": "^1.1.3",
-    "cheerio": "^0.20.0",
-    "del": "^2.0.2",
-    "gulp": "^3.9.0",
-    "gulp-autoprefixer": "^2.1.0",
-    "gulp-babel": "^6.1.2",
-    "gulp-clean-css": "^2.0.11",
-    "gulp-concat": "^2.5.2",
-    "gulp-if": "^2.0.1",
-    "gulp-jshint": "^1.10.0",
-    "gulp-load-plugins": "^1.2.4",
-    "gulp-plumber": "^1.0.0",
-    "gulp-posthtml": "^1.5.2",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^2.1.0",
-    "gulp-sourcemaps": "^1.6.0",
-    "gulp-uglify": "^1.2.0",
-    "posthtml-lorem": "^1.0.0",
-    "posthtml-static-react": "^1.0.1",
-    "react": "^0.14.8",
-    "route-pattern": "0.0.6",
-    "run-sequence": "^1.1.4",
+    "express": "^4.14.0",
+    "pmp-gulp": "git+ssh://git@github.com/kairos666/pmp-gulp.git",
+    "rx": "^4.1.0",
     "socket.io": "^1.4.6",
-    "tree-kill": "^1.1.0"
+    "spawn-watch": "^0.1.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "has-ansi": "^2.0.0",
+    "mocha": "^3.0.2",
+    "sinon": "^1.17.5"
   }
 }

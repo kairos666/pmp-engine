@@ -1,65 +1,78 @@
 'use strict'
 
-const EventEmitter      = require('events');
-const chalk             = require('chalk');
-const starter           = require('./engine/process-utils').starter;
-const restarter         = require('./engine/process-utils').restarter;
-const stopper           = require('./engine/process-utils').stopper;
+const SpawnWatch                    = require('spawn-watch');
+const starter                       = require('./engine/process-utils').starter;
+const Rx                            = require('rx');
+const statusEvts                    = require('./engine/configs').pmpEngineStatusEvts;
+const noBrowserTabArg               = require('./engine/configs').additionalArguments.noBrowserTabArg;
+const defaultIoConfig               = require('./engine/configs').defaultIoConfig;
 
-class PmpEngine extends EventEmitter {
-    constructor() {
-        super();
-        this._isStarted      = false;
-        this._childProcess   = undefined;
-        this._currentConfig  = undefined;
+class PmpEngine {
+    constructor(options) {
+        this._status                = new Rx.BehaviorSubject(statusEvts.stopped);
+        this._hellSpawn             = new SpawnWatch({ ipc:true });
+        this._socketServer          = null;
+        this._pimpCommandsConfig    = null;
+        // this._options               = {
+        //     ioEnabled:false,
+        //     ioServerConfig:defaultIoConfig 
+        // };
+
+        // //options settings (io socket serving)
+        // if(options) {
+        //     this._options = Object.assign(this._options, options);
+        // }
+
+        // //handle socket server enabled PmpEngine
+        // if(this._options.ioEnabled) {
+        //     const SocketServer = require('./socket-serving/io').SocketServer;
+        //     this._socketServer = new SocketServer(this, this._options.ioServerConfig);
+        // }
     }
 
-    //launch pmp engine with some config
-    start(engineCfg) {
-        if(!this.childProcess && engineCfg) {
-            //normal start
-            console.log(chalk.blue('PMP engine')  + ' ' + chalk.yellow('INIT'));
-            this._currentConfig = engineCfg;
-            this._childProcess = starter(engineCfg);
-        } else if(!this._childProcess && !engineCfg){
-            console.log(chalk.red('PMP engine error')  + ' ' + chalk.yellow('Can\'t start PMP engine without a config'));
-        } else if(this._childProcess){
-            console.log(chalk.red('PMP engine error')  + ' ' + chalk.yellow('Can\'t start PMP engine, if it is already started'));
-        }
-    };
+    //launch pmpEngine
+    start(pmpConfig, additionalArgs) {
+        if(!pmpConfig || !this.pmpEngineStatus === statusEvts.stopped) return false;
+        this._pimpCommandsConfig = pmpConfig;
+        return starter(this._hellSpawn, pmpConfig, this._status, additionalArgs);
+    }
 
-    restart(engineCfg) {
-        if(this._childProcess && engineCfg) {
-            //restart with new config
-            console.log(chalk.blue('PMP engine')  + ' ' + chalk.yellow('RESTART with new config'));
-            this._currentConfig = engineCfg;
-            this._childProcess = restarter(this._childProcess, engineCfg);
-        } else if(this._childProcess && !engineCfg) {
-            //restart with same config
-            console.log(chalk.blue('PMP engine')  + ' ' + chalk.yellow('RESTART with same config'));
-            this._childProcess = restarter(this._childProcess, this._currentConfig);
-        } else {
-            console.log(chalk.red('PMP engine error')  + ' ' + chalk.yellow('Can\'t restart PMP engine because it isn\'t started yet'));
-        }
-    };
+    //restart pmpEngine
+    restart(pmpConfig) {
+        let nextStartConfig = (pmpConfig) ? pmpConfig : Object.assign({}, this._pimpCommandsConfig);
+        let restartSubscription = this.pmpEngineStatusStream
+            .filter(engineStatus => { return (engineStatus === statusEvts.stopped) })
+            .subscribe(processStatus => {
+                this.start(nextStartConfig, [noBrowserTabArg]);
+                if(restartSubscription.unsubscribe) restartSubscription.unsubscribe();
+            });
+        
+        return this.stop();
+    }
 
-    //stop pmp engine instance if it exists (child process instance)
+    //stop pmpEngine
     stop() {
-        if(this._childProcess) {
-            //stop
-            console.log(chalk.blue('PMP engine')  + ' ' + chalk.yellow('STOP'));
-            this._childProcess = stopper(this._childProcess);
-            this._currentConfig = undefined;
-        } else {
-            console.log(chalk.red('PMP engine error')  + ' ' + chalk.yellow('Can\'t stop PMP engine because it isn\'t started yet'));
-        }
+        return this._hellSpawn.stop();
     };
 
-    get isStarted() { return this._isStarted; };
+    //get pmpEngine current status
+    get pmpEngineStatus() {
+        return this._status.value;
+    }
 
-    get currentConfig() { return Object.assign({}, this._currentConfig); };
-
-    get logStream() { return process.stdout; };
-} 
+    /* observables */
+    //status
+    get pmpEngineStatusStream() {
+        return this._status.asObservable().distinctUntilChanged();
+    }
+    //logs
+    get pmpEngineLogsStream() {
+        return this._hellSpawn.outEventStream;
+    }
+    //errors
+    get pmpEngineErrorsStream() {
+        return this._hellSpawn.errorStream;
+    }
+}
 
 module.exports = PmpEngine;
