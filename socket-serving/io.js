@@ -14,10 +14,9 @@ class SocketServer {
         this._io                        = require('socket.io')(this._httpSocket);
         this._inputStream               = new Rx.Subject();
         this._subscriptions             = [];
+        this._socket                    = null;
 
         //setup
-        this._setupInput();
-        this._setupOutput();
         this._setupServer();
     }
 
@@ -26,16 +25,22 @@ class SocketServer {
         //connect/disconnect behavior
         this._io.on(ioEvts.utils.connect, socket => {
             console.log(chalk.green(`Socket service CONNECTED`));
+            this._socket = socket;
 
             //handle disconnects
-            socket.once(ioEvts.utils.disconnect, () => {
+            this._socket.once(ioEvts.utils.disconnect, () => {
                 //clean subscriptions
                 if(this._subscriptions.length > 0) {
                     this._subscriptions.map(subscription => { subscription.unsubscribe(); });
                     this._subscriptions = [];
                 }
+                this._socket = null;
                 console.log(chalk.yellow(`Socket service DISCONNECTED`));
             });
+
+            //handle IO
+            this._setupInput();
+            this._setupOutput();
         });
 
         //socket server listening
@@ -45,31 +50,27 @@ class SocketServer {
     }
 
     _setupInput() {
-        this._io.on(ioEvts.utils.connect, socket => {
-            socket.on('input', evt => {
-                this._inputStream.onNext(evt);
-            });
-        });
+        this._socket.on('input', evt => {
+            this._inputStream.onNext(evt);
+        }); 
     }
 
     _setupOutput() {
-        this._io.on(ioEvts.utils.connect, socket => {
-            //status streaming
-            this._subscriptions.push(this._pmpEngine.pmpEngineStatusStream.subscribe(status => {
-                let evt = ioEvts.outputs.engineStatusLog(status);
-                socket.emit('output', evt);
-            }));
-            //log streaming
-            this._subscriptions.push(this._pmpEngine.pmpEngineLogsStream.subscribe(log => {
-                let evt = ioEvts.outputs.log(log);
-                socket.emit('output', evt);
-            }));
-            //errors streaming
-            this._subscriptions.push(this._pmpEngine.pmpEngineErrorsStream.subscribe(err => {
-                let evt = ioEvts.outputs.error(err);
-                socket.emit('output', evt);
-            }));
-        });
+        //status streaming
+        this._subscriptions.push(this._pmpEngine.pmpEngineStatusStream.subscribe(status => {
+            let evt = ioEvts.outputs.engineStatusLog(status);
+            this._socket.emit('output', evt);
+        }));
+        //log streaming
+        this._subscriptions.push(this._pmpEngine.pmpEngineLogsStream.subscribe(log => {
+            let evt = ioEvts.outputs.log(log);
+            this._socket.emit('output', evt);
+        }));
+        //errors streaming
+        this._subscriptions.push(this._pmpEngine.pmpEngineErrorsStream.subscribe(err => {
+            let evt = ioEvts.outputs.error(err);
+            this._socket.emit('output', evt);
+        }));
     }
 
     get inputStream() {
@@ -77,7 +78,7 @@ class SocketServer {
     }
 
     emit(data) {
-        this._httpSocket.emit('output', data);
+        this._socket.emit('output', data);
     }
 
     destroy() { 

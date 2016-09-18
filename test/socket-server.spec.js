@@ -35,6 +35,7 @@ class SocketTestClient {
         let cmdEvt;
         switch(cmd){
             case 'start': cmdEvt = ioEvt.inputs.startCmd(basePimpConfig); break;
+            case 'start-error': cmdEvt = ioEvt.inputs.startCmd(errPimpConfig); break;
             case 'stop': cmdEvt = ioEvt.inputs.stopCmd(); break;
             case 'restart': cmdEvt = ioEvt.inputs.restartCmd(); break;
             case 'config': cmdEvt = ioEvt.inputs.getConfigCmd(); break;
@@ -142,7 +143,34 @@ describe('SocketServer testing', function() {
         //start test (send start command via client)
         socketClient.fireSampleCmds('start');
     }).timeout(20000);
-    it.skip('SocketClient receiving outputs [error]', function(){});
-    it.skip('SocketClient asking/receiving pimp config', function(){});
+    it('SocketClient receiving outputs [error]', function(done){
+        //error
+        socketClient.incomingEvtsStream
+            .filter(evt => { return (evt.subType === 'error'); })
+            .map(evt => { return evt.payload; })
+            .subscribe(err => {
+                console.log(err);
+                done();
+            });
+
+        //start test (send start command via client)
+        socketClient.fireSampleCmds('start-error');
+    }).timeout(20000);
+    it('SocketClient asking/receiving pimp config', function(done){
+        //config
+        socketClient.incomingEvtsStream
+            .filter(evt => { return (evt.subType === 'config'); })
+            .map(evt => { return evt.payload; })
+            .subscribe(config => {
+                expect(config).to.deep.equal(basePimpConfig);
+                done();
+            });
+
+        //start test (send start command via client)
+        socketClient.fireSampleCmds('start');
+        setTimeout(function(){
+            socketClient.fireSampleCmds('config');  
+        }, 5000);
+    }).timeout(20000);
     it.skip('SocketClient receiving ansi/html colored logs', function(){});
 });
