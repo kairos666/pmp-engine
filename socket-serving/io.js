@@ -13,7 +13,7 @@ class SocketServer {
         this._httpSocket                = require('http').Server(this._superviseSocket);
         this._io                        = require('socket.io')(this._httpSocket);
         this._inputStream               = null;
-        this._inputStreamSubscription   = null;
+        this._subscriptions             = [];
 
         //setup
         this._setupInput();
@@ -29,8 +29,11 @@ class SocketServer {
 
             //handle disconnects
             socket.once(ioEvts.utils.disconnect, () => {
-                //clean input stream
-                if(this._inputStreamSubscription) this._inputStreamSubscription.unsubscribe();
+                //clean subscriptions
+                if(this._subscriptions.length > 0) {
+                    this._subscriptions.map(subscription => { subscription.unsubscribe(); });
+                    this._subscriptions = [];
+                }
                 if(this._inputStream) this._inputStream = null;
                 console.log(chalk.yellow(`Socket service DISCONNECTED`));
             });
@@ -47,14 +50,30 @@ class SocketServer {
             this._inputStream = Rx.Observable.fromEvent(socket, 'input');
 
             //INPUTS SUBSCRIPTION
-            this._inputStreamSubscription = this._inputStream.subscribe(inputCmd => {
+            this._subscriptions.push(this._inputStream.subscribe(inputCmd => {
                 console.log('received input', inputCmd);
-            });
+            }));
         });
     }
 
     _setupOutput() {
-
+        this._io.on(ioEvts.utils.connect, socket => {
+            //status streaming
+            this._subscriptions.push(this._pmpEngine.pmpEngineStatusStream.subscribe(status => {
+                let evt = ioEvts.outputs.engineStatusLog(status);
+                socket.broadcast.emit(evt);
+            }));
+            //log streaming
+            this._subscriptions.push(this._pmpEngine.pmpEngineLogsStream.subscribe(log => {
+                let evt = ioEvts.outputs.log(log);
+                socket.broadcast.emit(evt);
+            }));
+            //errors streaming
+            this._subscriptions.push(this._pmpEngine.pmpEngineErrorsStream.subscribe(err => {
+                let evt = ioEvts.outputs.error(err);
+                socket.broadcast.emit(evt);
+            }));
+        });
     }
 }
 
