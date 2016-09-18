@@ -50,7 +50,7 @@ class PmpEngine {
             .filter(engineStatus => { return (engineStatus === statusEvts.stopped) })
             .subscribe(processStatus => {
                 this.start(nextStartConfig, [noBrowserTabArg]);
-                if(restartSubscription.unsubscribe) restartSubscription.unsubscribe();
+                if(restartSubscription.dispose) restartSubscription.dispose();
             });
         
         return this.stop();

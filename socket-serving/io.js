@@ -31,7 +31,7 @@ class SocketServer {
             this._socket.once(ioEvts.utils.disconnect, () => {
                 //clean subscriptions
                 if(this._subscriptions.length > 0) {
-                    this._subscriptions.map(subscription => { subscription.unsubscribe(); });
+                    this._subscriptions.map(subscription => { subscription.dispose(); });
                     this._subscriptions = [];
                 }
                 this._socket = null;

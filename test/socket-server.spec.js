@@ -111,7 +111,10 @@ describe('SocketServer testing', function() {
             if(logCount >= 15 && statusCount >= 3) return true;
             return false;
         }
-        let alreadyEnded = false;
+        let endTest = function() {
+            subscriptions.map(sub => { sub.dispose(); });
+            done();
+        }
 
         //status
         subscriptions.push(socketClient.incomingEvtsStream
@@ -120,10 +123,7 @@ describe('SocketServer testing', function() {
             .subscribe(status => {
                 statusCount++;
                 //console.log(status);
-                if(!alreadyEnded && endTestChecker()) {
-                    alreadyEnded = true;
-                    done();
-                }
+                if(endTestChecker()) endTest();
             })
         );
         //logs
@@ -133,10 +133,7 @@ describe('SocketServer testing', function() {
             .subscribe(log => {
                 logCount++;
                 //console.log(log);
-                if(!alreadyEnded && endTestChecker()) {
-                    alreadyEnded = true;
-                    done();
-                }
+                if(endTestChecker()) endTest();
             })
         );
 
