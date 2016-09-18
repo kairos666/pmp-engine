@@ -10,7 +10,8 @@ module.exports = {
     outputs: {
         engineStatusLog: function(status) { return { type:'output', subType:'status', payload:status }},
         log: function(log) { return { type:'output', subType:'log', payload:log }},
-        error: function(error) { return { type:'output', subType:'error', payload:error }}
+        error: function(error) { return { type:'output', subType:'error', payload:error }},
+        config: function(config) { return { type:'output', subType:'config', payload:config } }
     },
     utils: {
         disconnect: 'disconnect',

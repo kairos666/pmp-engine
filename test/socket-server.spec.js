@@ -13,7 +13,7 @@ class SocketTestClient {
     constructor(connectUrl, callback){
         this._ioClient = require('socket.io-client');
         this._socket = this._ioClient.connect(connectUrl);
-        this._incomingEvtsStream = null;
+        this._incomingEvtsStream = new Rx.Subject();
         this.isConnected = false;
 
         this._socket.on('connect', () => {
@@ -26,7 +26,9 @@ class SocketTestClient {
             callback(this.isConnected);
         });
 
-        this._incomingEvtsStream = Rx.Observable.fromEvent(this._socket, 'output');
+        this._socket.on('output', (evt) => {
+            this._incomingEvtsStream.onNext(evt);
+        });
     }
 
     fireSampleCmds(cmd) {
@@ -41,7 +43,7 @@ class SocketTestClient {
     }
 
     get incomingEvtsStream(){
-        return this._incomingEvtsStream;
+        return this._incomingEvtsStream.asObservable();
     }
 
     disconnect() {
@@ -100,19 +102,15 @@ describe('SocketServer testing', function() {
         //first input launch
         socketClient.fireSampleCmds(iteration.value.fire);
     });
-    it('SocketClient receiving outputs [status, logs] and ansi colors are enabled', function(done){
+    it('SocketClient receiving outputs [status, logs]', function(done){
         let logCount = 0;
         let statusCount = 0;
-        let hasOneAnsi = false;
         let subscriptions = [];
         let endTestChecker = function(){
-            if(logCount >= 15 && statusCount >= 3 && hasOneAnsi) return true;
+            if(logCount >= 15 && statusCount >= 3) return true;
             return false;
         }
-        let endTest = function() {
-            subscriptions.map(sub => { sub.unsubscribe(); });
-            done();
-        }
+        let alreadyEnded = false;
 
         //status
         subscriptions.push(socketClient.incomingEvtsStream
@@ -120,8 +118,11 @@ describe('SocketServer testing', function() {
             .map(evt => { return evt.payload; })
             .subscribe(status => {
                 statusCount++;
-                console.log(status);
-                if(endTestChecker()) endTest();
+                //console.log(status);
+                if(!alreadyEnded && endTestChecker()) {
+                    alreadyEnded = true;
+                    done();
+                }
             })
         );
         //logs
@@ -130,13 +131,18 @@ describe('SocketServer testing', function() {
             .map(evt => { return evt.payload; })
             .subscribe(log => {
                 logCount++;
-                console.log(log);
-                if(!hasOneAnsi && hasAnsi(log)) hasOneAnsi = true;
-                if(endTestChecker()) endTest();
+                //console.log(log);
+                if(!alreadyEnded && endTestChecker()) {
+                    alreadyEnded = true;
+                    done();
+                }
             })
         );
 
         //start test (send start command via client)
         socketClient.fireSampleCmds('start');
     }).timeout(20000);
+    it.skip('SocketClient receiving outputs [error]', function(){});
+    it.skip('SocketClient asking/receiving pimp config', function(){});
+    it.skip('SocketClient receiving ansi/html colored logs', function(){});
 });

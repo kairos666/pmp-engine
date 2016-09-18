@@ -6,6 +6,7 @@ const Rx                            = require('rx');
 const statusEvts                    = require('./engine/configs').pmpEngineStatusEvts;
 const noBrowserTabArg               = require('./engine/configs').additionalArguments.noBrowserTabArg;
 const defaultIoConfig               = require('./engine/configs').defaultIoConfig;
+const ioEvts                        = require('./socket-serving/ioEvts');
 
 class PmpEngine {
     constructor(options) {
@@ -89,9 +90,7 @@ const socketInputActions = function(input) {
         case 'start-command': this.start(input.payload); break;
         case 'stop-command': this.stop(); break;
         case 'restart-command': this.restart(input.payload); break;
-        case 'config-command': 
-            console.log('TODO handle socket calls to config' + this.currentPimpConfig);
-        break;
+        case 'config-command': this._socketServer.emit(ioEvts.outputs.config(this.currentPimpConfig)); break;
 
         default:
             console.log('pmpEngine received unknown command ' + input);

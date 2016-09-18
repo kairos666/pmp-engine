@@ -57,23 +57,27 @@ class SocketServer {
             //status streaming
             this._subscriptions.push(this._pmpEngine.pmpEngineStatusStream.subscribe(status => {
                 let evt = ioEvts.outputs.engineStatusLog(status);
-                socket.broadcast.emit('output', evt);
+                socket.emit('output', evt);
             }));
             //log streaming
             this._subscriptions.push(this._pmpEngine.pmpEngineLogsStream.subscribe(log => {
                 let evt = ioEvts.outputs.log(log);
-                socket.broadcast.emit('output',evt);
+                socket.emit('output', evt);
             }));
             //errors streaming
             this._subscriptions.push(this._pmpEngine.pmpEngineErrorsStream.subscribe(err => {
                 let evt = ioEvts.outputs.error(err);
-                socket.broadcast.emit('output',evt);
+                socket.emit('output', evt);
             }));
         });
     }
 
     get inputStream() {
         return this._inputStream.asObservable();
+    }
+
+    emit(data) {
+        this._httpSocket.emit('output', data);
     }
 
     destroy() { 
