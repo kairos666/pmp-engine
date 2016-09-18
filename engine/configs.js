@@ -44,8 +44,7 @@ class PmpGulpEvt {
 
 const defaultIoConfig = {
     host: 'localhost',
-    ioPort: 5000,
-    uiPort: 3001
+    port: 5000
 };
 
 module.exports = {

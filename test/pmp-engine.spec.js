@@ -3,7 +3,7 @@
 const sinon                 = require('sinon');
 const PmpEngine             = require('../index');
 const basePimpConfig        = require('./assets/test-configs').basePimpCommands;
-const errPimpConfig         = require('./assets/test-configs').errPimpCommands
+const errPimpConfig         = require('./assets/test-configs').errPimpCommands;
 const configs               = require('../engine/configs');
 const hasAnsi               = require('has-ansi');
 
