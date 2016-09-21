@@ -1,5 +1,3 @@
-# doc below is related to 1.0.3 --> will be updated soon
-
 # pmp-engine
 Ever wanted to experiment on and customize a webpage ? The **Pimp my page engine** let's you do just that.
 The engine leverage the mighty [BrowserSync](https://www.browsersync.io/) to allow full HTML, CSS or JS modifications on any webpage. 
@@ -125,7 +123,29 @@ pmpEngine.restart(updatedConfig);
 
 //stop engine
 pmpEngine.stop();
+
+//get all logs outputs (RXjs Observable)
+pmpEngine.pmpEngineLogsStream.subscribe(log => {
+    console.log(log);
+});
+
+//get all errors (RXjs Observable)
+pmpEngine.pmpEngineErrorsStream.subscribe(err => {
+    console.log(err);
+});
+
+//get pmp engine status (RXjs Observable)
+pmpEngine.pmpEngineStatusStream.subscribe(status => {
+    console.log(status);
+});
+
+//get currently applied config
+console.log(pmpEngine.currentPimpConfig);
+
+//get current status [started, stopped, pending]
+console.log(pmpEngine.pmpEngineStatus);
 ```
+have a look at the test to have more code samples
 
 ## Examples
 In the pimpCmd Object there is a set of operations that will allow you to perform some actions on the request's HTML payload.
@@ -203,6 +223,24 @@ modifs:[`
 `]
 ```
 
+### remotely control pmp-engine (via websocket)
+
+#### enabling socket server
+```javascript
+new PmpEngine({ ioEnabled:true, host: 'localhost', port: 5000 });
+```
+
+property | values | default | comment
+------------ | ------------- | ------------- | -------------
+ioEnabled | [Boolean] | false | enables remote control
+host | [url] | 'localhost' | socket.io host property
+port | [number] | 5000 | socket.io port property
+
+#### remote control
+That will enables you to provide a GUI to interact with the pmp-engine.
+You can see a minimal socket.io client setting in **socket-server.spec.js**
+This functionnality will be leveraged in an upcoming pmp-ui package
+
 ## Limitations
 * need some tests certainly some weird behaviors now and then :hear_no_evil:
 * cross domains problems when dealing with https sites. This is baked in security for any browser, may be bypassed by extensions such has [this one](https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi?utm_source=chrome-app-launcher-info-dialog) ... beware this is dangerous :bangbang:
@@ -212,4 +250,4 @@ modifs:[`
 - [x] test coverage (v2.0.0)
 - [x] socket server to remotely control pmp-engine (v2.0.0)
 - [ ] plugin system to import DOM manipulation helper functions to power-up the pimpCmds (ex:injectHTML function)
-- [ ] GUI to make pmp-engine usage a breeze
+- [ ] pmp-ui, GUI to make pmp-engine usage a breeze
