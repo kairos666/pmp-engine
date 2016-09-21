@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/pmp-engine.svg)](https://badge.fury.io/js/pmp-engine)
+
 # pmp-engine
 Ever wanted to experiment on and customize a webpage ? The **Pimp my page engine** let's you do just that.
 The engine leverage the mighty [BrowserSync](https://www.browsersync.io/) to allow full HTML, CSS or JS modifications on any webpage. 
