@@ -97,4 +97,16 @@ const socketInputActions = function(input) {
     }
 }
 
+/* ===========================================================================
+  LAUNCH IN STANDALONE MODE
+=========================================================================== */
+process.argv.map(function(arg){
+  if(arg === '--standalone'){
+    console.log('PMP-ENGINE - STANDALONE MODE');
+
+    //create pmp engine instance with socket connection
+    let pmpEngine = new PmpEngine({ ioEnabled:true });
+  }
+});
+
 module.exports = PmpEngine;

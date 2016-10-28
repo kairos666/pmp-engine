@@ -1,10 +1,10 @@
 {
   "name": "pmp-engine",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Pimp My Page BrowserSync based web mod engine",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node index.js --standalone",
     "test": "mocha test --require test/chai.js --reporter spec"
   },
   "author": "David Maggi <musashi.miyamoto81@gmail.com>",
