@@ -46,11 +46,11 @@ class PmpEngine {
     //restart pmpEngine
     restart(pmpConfig) {
         let nextStartConfig = (pmpConfig) ? pmpConfig : Object.assign({}, this._pimpCommandsConfig);
-        let restartSubscription = this.pmpEngineStatusStream
+        this.pmpEngineStatusStream
             .filter(engineStatus => { return (engineStatus === statusEvts.stopped) })
+            .first()
             .subscribe(processStatus => {
                 this.start(nextStartConfig, [noBrowserTabArg]);
-                if(restartSubscription.dispose) restartSubscription.dispose();
             });
         
         return this.stop();

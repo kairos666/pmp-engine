@@ -23,13 +23,18 @@ let starter = function(spawnWatch, pmpConfig, statusStream, additionalArguments)
      * ********************************************************************* */
 
     //STEP 1
-    spawnWatch.processEventStream.subscribe((evt)=>{
+    let pEvtSub = spawnWatch.processEventStream.subscribe((evt)=>{
+        console.log(evt)
         //react to process evts
-        if(evt === 'stopped') statusStream.onNext(pmpEngineStatusEvts.stopped);
         if(evt === 'pending stop' || evt === 'pending start') statusStream.onNext(pmpEngineStatusEvts.pending);
+        if(evt === 'stopped') {
+            statusStream.onNext(pmpEngineStatusEvts.stopped);
+            pEvtSub.dispose();
+        }
         //do not react to started evt because this is handled below (at the hand of step 4)
     });
-    spawnWatch.ipcStream.subscribe(IPCmsg => {
+    let ipsEvtSub = spawnWatch.ipcStream.subscribe(IPCmsg => {
+        console.log(IPCmsg)
         switch(IPCmsg.type){ 
             //STEP 2                   
             case pmpEvts.init:
@@ -40,6 +45,7 @@ let starter = function(spawnWatch, pmpConfig, statusStream, additionalArguments)
             //STEP 4
             case pmpEvts.started:
                 statusStream.onNext(pmpEngineStatusEvts.started);
+                ipsEvtSub.dispose();
             break;
         };
     });
