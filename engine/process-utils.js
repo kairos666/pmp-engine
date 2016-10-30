@@ -21,20 +21,26 @@ let starter = function(spawnWatch, pmpConfig, statusStream, additionalArguments)
      *  3 - pass gulp pimpCommands config to child process
      *  4 - receive pmpEngine started notification
      * ********************************************************************* */
-
     //STEP 1
-    let pEvtSub = spawnWatch.processEventStream.subscribe((evt)=>{
-        console.log(evt)
-        //react to process evts
-        if(evt === 'pending stop' || evt === 'pending start') statusStream.onNext(pmpEngineStatusEvts.pending);
-        if(evt === 'stopped') {
-            statusStream.onNext(pmpEngineStatusEvts.stopped);
-            pEvtSub.dispose();
-        }
-        //do not react to started evt because this is handled below (at the hand of step 4)
-    });
+
+    //status update - pending start / pending stop / stopped (started update is done at step 4)
+    //all updates can happen once
+    spawnWatch.processEventStream
+        .filter(status => (status === 'pending start'))
+        .first()
+        .subscribe((evt)=>{ statusStream.onNext(pmpEngineStatusEvts.pending); });
+
+    spawnWatch.processEventStream
+        .filter(status => (status === 'pending stop'))
+        .first()
+        .subscribe((evt)=>{ statusStream.onNext(pmpEngineStatusEvts.pending); });
+
+    spawnWatch.processEventStream
+        .filter(status => (status === 'stopped'))
+        .first()
+        .subscribe((evt)=>{ statusStream.onNext(pmpEngineStatusEvts.stopped); });
+
     let ipsEvtSub = spawnWatch.ipcStream.subscribe(IPCmsg => {
-        console.log(IPCmsg)
         switch(IPCmsg.type){ 
             //STEP 2                   
             case pmpEvts.init:
@@ -42,7 +48,7 @@ let starter = function(spawnWatch, pmpConfig, statusStream, additionalArguments)
                 spawnWatch.ipcInput(new PmpEvt(pmpEvts.configSend, pmpConfig));
             break;
 
-            //STEP 4
+            //STEP 4 (! ipc started event means pmp-gulp, not the child process itself)
             case pmpEvts.started:
                 statusStream.onNext(pmpEngineStatusEvts.started);
                 ipsEvtSub.dispose();
