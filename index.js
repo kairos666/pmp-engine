@@ -100,13 +100,30 @@ const socketInputActions = function(input) {
 /* ===========================================================================
   LAUNCH IN STANDALONE MODE
 =========================================================================== */
+let isStandAlone = false;
+let isDebug = false;
 process.argv.map(function(arg){
   if(arg === '--standalone'){
     console.log('PMP-ENGINE - STANDALONE MODE');
-
-    //create pmp engine instance with socket connection
-    let pmpEngine = new PmpEngine({ ioEnabled:true });
+    isStandAlone    = true;
+    isDebug         = false;
+  } else if(arg === '--standalone-debug') {
+    console.log('PMP-ENGINE - STANDALONE MODE & DEBUG');
+    isStandAlone = isDebug = true;
   }
 });
+
+if(isStandAlone) {
+    // create pmp engine instance with socket connection
+    let pmpEngine = new PmpEngine({ ioEnabled:true });
+
+    // debug
+    if(isDebug) {
+        pmpEngine._hellSpawn._status.subscribe(status => {
+            console.log('status changes --> ' + status);
+            if(status === 'started') console.dir(pmpEngine._pimpCommandsConfig, { depth: null });
+        });
+    }
+};
 
 module.exports = PmpEngine;
