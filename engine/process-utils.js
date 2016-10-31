@@ -25,20 +25,18 @@ let starter = function(spawnWatch, pmpConfig, statusStream, additionalArguments)
 
     //status update - pending start / pending stop / stopped (started update is done at step 4)
     //all updates can happen once
-    spawnWatch.processEventStream
-        .filter(status => (status === 'pending start'))
-        .first()
-        .subscribe((evt)=>{ statusStream.onNext(pmpEngineStatusEvts.pending); });
-
-    spawnWatch.processEventStream
-        .filter(status => (status === 'pending stop'))
-        .first()
-        .subscribe((evt)=>{ statusStream.onNext(pmpEngineStatusEvts.pending); });
-
-    spawnWatch.processEventStream
-        .filter(status => (status === 'stopped'))
-        .first()
-        .subscribe((evt)=>{ statusStream.onNext(pmpEngineStatusEvts.stopped); });
+    let filterAndListenOnce = filterKey => {
+        return input => input.filter(status => (status === filterKey)).first();
+    }
+    spawnWatch.processEventStream.let(filterAndListenOnce('pending start')).subscribe(evt => { 
+        statusStream.onNext(pmpEngineStatusEvts.pending); 
+    });
+    spawnWatch.processEventStream.let(filterAndListenOnce('pending stop')).subscribe(evt => { 
+        statusStream.onNext(pmpEngineStatusEvts.pending); 
+    });
+    spawnWatch.processEventStream.let(filterAndListenOnce('stopped')).subscribe(evt => { 
+        statusStream.onNext(pmpEngineStatusEvts.stopped); 
+    });
 
     let ipsEvtSub = spawnWatch.ipcStream.subscribe(IPCmsg => {
         switch(IPCmsg.type){ 
