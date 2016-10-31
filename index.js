@@ -45,12 +45,30 @@ class PmpEngine {
 
     //restart pmpEngine
     restart(pmpConfig) {
-        let nextStartConfig = (pmpConfig) ? pmpConfig : Object.assign({}, this._pimpCommandsConfig);
+        let oldConfig       = Object.assign({}, this._pimpCommandsConfig);
+        let nextStartConfig = (pmpConfig) ? pmpConfig : oldConfig;
+        let sameTargetURL   = () => {
+            let oldTargetURL = oldConfig.bsOptions.proxy.target;
+            let newTargetURL = pmpConfig.bsOptions.proxy.target;
+            console.log('identical targetURL: ', (oldTargetURL === newTargetURL))
+            return (oldTargetURL === newTargetURL) 
+        }
+        let samePort        = () => {
+            let oldPort = oldConfig.bsOptions.port;
+            let newPort = pmpConfig.bsOptions.port;
+            console.log('identical port: ', (oldPort === newPort))
+            return (oldPort === newPort)
+        }
+
         this.pmpEngineStatusStream
             .filter(engineStatus => { return (engineStatus === statusEvts.stopped) })
             .first()
             .subscribe(processStatus => {
-                this.start(nextStartConfig, [noBrowserTabArg]);
+                // no need for new tab unless targetURL &/or port has changed
+                let additionalArgs = [];
+                if(pmpConfig && sameTargetURL() && samePort()) additionalArgs.push(noBrowserTabArg);
+                // apply new start
+                this.start(nextStartConfig, additionalArgs);
             });
         
         return this.stop();
