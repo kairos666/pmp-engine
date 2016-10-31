@@ -50,13 +50,13 @@ class PmpEngine {
         let sameTargetURL   = () => {
             let oldTargetURL = oldConfig.bsOptions.proxy.target;
             let newTargetURL = pmpConfig.bsOptions.proxy.target;
-            console.log('identical targetURL: ', (oldTargetURL === newTargetURL))
+            
             return (oldTargetURL === newTargetURL) 
         }
         let samePort        = () => {
             let oldPort = oldConfig.bsOptions.port;
             let newPort = pmpConfig.bsOptions.port;
-            console.log('identical port: ', (oldPort === newPort))
+
             return (oldPort === newPort)
         }
 
