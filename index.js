@@ -7,6 +7,7 @@ const statusEvts                    = require('./engine/configs').pmpEngineStatu
 const noBrowserTabArg               = require('./engine/configs').additionalArguments.noBrowserTabArg;
 const defaultIoConfig               = require('./engine/configs').defaultIoConfig;
 const ioEvts                        = require('./socket-serving/ioEvts');
+const url                           = require('url');
 
 class PmpEngine {
     constructor(options) {
@@ -50,7 +51,7 @@ class PmpEngine {
         let sameTargetURL   = () => {
             let oldTargetURL = oldConfig.bsOptions.proxy.target;
             let newTargetURL = pmpConfig.bsOptions.proxy.target;
-            
+
             return (oldTargetURL === newTargetURL) 
         }
         let samePort        = () => {
@@ -84,8 +85,25 @@ class PmpEngine {
         return this._status.value;
     }
 
+    //get pmpEngine currentConfig
     get currentPimpConfig() {
         return Object.assign({}, this._pimpCommandsConfig);
+    }
+
+    //get pmpEngine useful URLs
+    get usefulLinks() {
+        let usefulLinks = {};
+        if(this._pimpCommandsConfig && this.pmpEngineStatus === statusEvts.started) {
+            let confTargetURL   = url.parse(this._pimpCommandsConfig.bsOptions.proxy.target);
+            let confPort        = this._pimpCommandsConfig.bsOptions.port;
+
+            usefulLinks.originURL = confTargetURL.href;
+            usefulLinks.proxiedURL = 'localhost:' + confPort + confTargetURL.pathname;
+            usefulLinks.bsUIURL = 'localhost:3001';
+            usefulLinks.pimpSrcFilesPath = require.resolve('pmp-gulp').replace('gulpfile.js', 'src');
+        }
+
+        return usefulLinks
     }
 
     /* observables */
@@ -109,6 +127,7 @@ const socketInputActions = function(input) {
         case 'stop-command': this.stop(); break;
         case 'restart-command': this.restart(input.payload); break;
         case 'config-command': this._socketServer.emit(ioEvts.outputs.config(this.currentPimpConfig)); break;
+        case 'links-command': this._socketServer.emit(ioEvts.outputs.usefulLinks(this.usefulLinks)); break;
 
         default:
             console.log('pmpEngine received unknown command ' + input);

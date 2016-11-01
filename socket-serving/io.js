@@ -59,17 +59,17 @@ class SocketServer {
         //status streaming
         this._subscriptions.push(this._pmpEngine.pmpEngineStatusStream.subscribe(status => {
             let evt = ioEvts.outputs.engineStatusLog(status);
-            this._socket.emit('output', evt);
+            this.emit(evt);
         }));
         //log streaming
         this._subscriptions.push(this._pmpEngine.pmpEngineLogsStream.subscribe(log => {
             let evt = ioEvts.outputs.log(log);
-            this._socket.emit('output', evt);
+            this.emit(evt);
         }));
         //errors streaming
         this._subscriptions.push(this._pmpEngine.pmpEngineErrorsStream.subscribe(err => {
             let evt = ioEvts.outputs.error(err);
-            this._socket.emit('output', evt);
+            this.emit(evt);
         }));
     }
 
