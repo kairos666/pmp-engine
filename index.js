@@ -96,10 +96,11 @@ class PmpEngine {
         if(this._pimpCommandsConfig && this.pmpEngineStatus === statusEvts.started) {
             let confTargetURL   = url.parse(this._pimpCommandsConfig.bsOptions.proxy.target);
             let confPort        = this._pimpCommandsConfig.bsOptions.port;
+            console.log(confTargetURL.protocol)
 
             usefulLinks.originURL = confTargetURL.href;
-            usefulLinks.proxiedURL = 'localhost:' + confPort + confTargetURL.pathname;
-            usefulLinks.bsUIURL = 'localhost:3001';
+            usefulLinks.proxiedURL = confTargetURL.protocol + '//localhost:' + confPort + confTargetURL.pathname;
+            usefulLinks.bsUIURL = confTargetURL.protocol + '//localhost:3001';
             usefulLinks.pimpSrcFilesPath = require.resolve('pmp-gulp').replace('gulpfile.js', 'src');
         }
 
