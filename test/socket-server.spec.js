@@ -6,6 +6,7 @@ const ioEvt                 = require('../socket-serving/ioEvts');
 const SocketServer          = require('../socket-serving/io').SocketServer;
 const basePimpConfig        = require('./assets/test-configs').basePimpCommands;
 const errPimpConfig         = require('./assets/test-configs').errPimpCommands;
+const basePimpUsefulLinks   = require('./assets/test-configs').basePimpUsefulLinks;
 const Rx                    = require('rx');
 const hasAnsi               = require('has-ansi');
 
@@ -171,6 +172,41 @@ describe('SocketServer testing', function() {
         socketClient.fireSampleCmds('start');
         setTimeout(function(){
             socketClient.fireSampleCmds('config');  
+        }, 5000);
+    }).timeout(20000);
+    it('SocketClient asking/receiving useful links', function(done){
+        //links
+        socketClient.incomingEvtsStream
+            .filter(evt => { return (evt.subType === 'links'); })
+            .map(evt => { return evt.payload; })
+            .subscribe(links => {
+                //delete src path (may differ depending where the test is run)
+                delete links.pimpSrcFilesPath;
+                expect(links).to.deep.equal(basePimpUsefulLinks);
+                done();
+            });
+
+        //start test (send start command via client)
+        socketClient.fireSampleCmds('start');
+        setTimeout(function(){
+            socketClient.fireSampleCmds('links');  
+        }, 5000);
+    }).timeout(20000);
+    it('SocketClient asking/receiving available plugins', function(done){
+        //plugins
+        socketClient.incomingEvtsStream
+            .filter(evt => { return (evt.subType === 'plugins'); })
+            .map(evt => { return evt.payload; })
+            .subscribe(plugins => {
+                expect(plugins).to.exist;
+                expect(plugins).to.be.an('array');
+                done();
+            });
+
+        //start test (send start command via client)
+        socketClient.fireSampleCmds('start');
+        setTimeout(function(){
+            socketClient.fireSampleCmds('plugins');  
         }, 5000);
     }).timeout(20000);
     it.skip('SocketClient receiving ansi/html colored logs', function(){});

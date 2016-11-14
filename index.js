@@ -8,6 +8,7 @@ const noBrowserTabArg               = require('./engine/configs').additionalArgu
 const defaultIoConfig               = require('./engine/configs').defaultIoConfig;
 const ioEvts                        = require('./socket-serving/ioEvts');
 const url                           = require('url');
+const pluginsFinder                 = require('./engine/plugins-finder');
 
 class PmpEngine {
     constructor(options) {
@@ -128,7 +129,12 @@ const socketInputActions = function(input) {
         case 'restart-command': this.restart(input.payload); break;
         case 'config-command': this._socketServer.emit(ioEvts.outputs.config(this.currentPimpConfig)); break;
         case 'links-command': this._socketServer.emit(ioEvts.outputs.usefulLinks(this.usefulLinks)); break;
-        case 'available-plugins-command': this._socketServer.emit(ioEvts.outputs.availablePlugins('TODO plugin list')); break;
+        case 'available-plugins-command': 
+            pluginsFinder.getAvailablePmpPluginsPromise('pmp-plugin').then(availablePlugins => {
+                // emit available plugins
+                this._socketServer.emit(ioEvts.outputs.availablePlugins(availablePlugins)); 
+            });       
+        break;
 
         default:
             console.log('pmpEngine received unknown command ' + input);

@@ -64,7 +64,14 @@ let errPimpCommands = {
     ]
 };
 
+let basePimpUsefulLinks = {
+    "bsUIURL": "http://localhost:3001",
+    "originURL": "http://www.syntaxsuccess.com/viewarticle/socket.io-with-rxjs-in-angular-2.0",
+    "proxiedURL": "http://localhost:3000/viewarticle/socket.io-with-rxjs-in-angular-2.0"
+};
+
 module.exports = {
     basePimpCommands: basePimpCommands,
-    errPimpCommands: errPimpCommands
+    errPimpCommands: errPimpCommands,
+    basePimpUsefulLinks: basePimpUsefulLinks
 }
