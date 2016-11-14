@@ -107,6 +107,11 @@ class PmpEngine {
         return usefulLinks
     }
 
+    //get available plugins as promise
+    get availablePluginsPromise() {
+        return pluginsFinder.getAvailablePmpPluginsPromise('pmp-plugin');
+    }
+
     /* observables */
     //status
     get pmpEngineStatusStream() {
@@ -166,6 +171,10 @@ if(isStandAlone) {
         pmpEngine._hellSpawn._status.subscribe(status => {
             console.log('status changes --> ' + status);
             if(status === 'started') console.dir(pmpEngine._pimpCommandsConfig, { depth: null });
+        });
+
+        pmpEngine.availablePluginsPromise.then(availablePlugins => {
+            console.log('available plugins: ', availablePlugins);
         });
     }
 };
