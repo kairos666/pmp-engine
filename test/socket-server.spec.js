@@ -39,6 +39,8 @@ class SocketTestClient {
             case 'stop': cmdEvt = ioEvt.inputs.stopCmd(); break;
             case 'restart': cmdEvt = ioEvt.inputs.restartCmd(); break;
             case 'config': cmdEvt = ioEvt.inputs.getConfigCmd(); break;
+            case 'links': cmdEvt = ioEvt.inputs.getUsefulLinks(); break;
+            case 'plugins': cmdEvt = ioEvt.inputs.getAvailablePlugins(); break;
         }
         this._socket.emit('input', cmdEvt);
     }
@@ -78,12 +80,14 @@ describe('SocketServer testing', function() {
         this.sandbox.restore();
     });
 
-    it('SocketServer receiving valid input commands [start, stop, restart, getConfig]', function(done){
+    it('SocketServer receiving valid input commands [start, stop, restart, getConfig, links, plugins]', function(done){
         let inputGenerator = function * () {
             yield { fire:'start', receive:'start-command' };
             yield { fire:'stop', receive:'stop-command' };
             yield { fire:'restart', receive:'restart-command' };
-            return { fire:'config', receive:'config-command' };
+            yield { fire:'config', receive:'config-command' };
+            yield { fire:'links', receive:'links-command' };
+            return { fire:'plugins', receive:'available-plugins-command' };
         }
         let inputSequence = inputGenerator();
         let iteration = inputSequence.next();

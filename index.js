@@ -128,6 +128,7 @@ const socketInputActions = function(input) {
         case 'restart-command': this.restart(input.payload); break;
         case 'config-command': this._socketServer.emit(ioEvts.outputs.config(this.currentPimpConfig)); break;
         case 'links-command': this._socketServer.emit(ioEvts.outputs.usefulLinks(this.usefulLinks)); break;
+        case 'available-plugins-command': this._socketServer.emit(ioEvts.outputs.availablePlugins('TODO plugin list')); break;
 
         default:
             console.log('pmpEngine received unknown command ' + input);
