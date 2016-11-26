@@ -8,17 +8,17 @@ const packageEntryPoint      = 'index.js';
 const packageDescriptorFile  = 'package.json';
 const packageReadmeFile      = 'README.md';
 
-// description PROMISER
-let descPromiser = packageName => {
-  let descPromise            = Q.defer();
+// description / js helpers / html helpers PROMISER
+let descObjPromiser = packageName => {
+  let descObjPromise         = Q.defer();
   let packagePath;
 
   // try requiring the plugin
   try {
     packagePath = require.resolve(packageName);
   } catch(e) {
-    descPromise.reject(`can't require ${packageName}`);
-    return descPromise.promise;
+    descObjPromise.reject(`can't require ${packageName}`);
+    return descObjPromise.promise;
   }
 
   let packageJsonPath        = path.resolve(packagePath.replace(packageEntryPoint, ''), '..', packageDescriptorFile);
@@ -26,14 +26,14 @@ let descPromiser = packageName => {
   readFile(packageJsonPath, 'utf8', (err, data) => {
     if(err) {
       // in case of a fail - resolve anyway
-      descPromise.resolve('');
+      descObjPromise.resolve({});
     } else {
       let descObj = JSON.parse(data);
-      descPromise.resolve(descObj.description);
+      descObjPromise.resolve(descObj);
     }
   });
 
-  return descPromise.promise;
+  return descObjPromise.promise;
 }
 
 // readme PROMISER
@@ -63,10 +63,12 @@ let readmePromiser = packageName => {
 }
 
 class PmpPluginDescriptor {
-  constructor(packageName, packageDescription, packageReadme) {
+  constructor(packageName, packageDescription, packageReadme, jsHelpers, htmlHelpers) {
     this.packageName             = packageName;
     this.packageDescription      = packageDescription;
     this.packageReadme           = packageReadme;
+    this.packageJsHelpers        = jsHelpers;
+    this.packageHtmlHelpers      = htmlHelpers;
   }
 }
 
@@ -92,14 +94,17 @@ let getAvailablePmpPluginsPromise = (pluginNamePattern) => {
     let PluginPromisesArray = [];
 
     filteredPackageArray.forEach(packageName => {
-      let descPromise           = descPromiser(packageName);
+      let descObjPromise        = descObjPromiser(packageName);
       let readmePromise         = readmePromiser(packageName);
 
       PluginPromisesArray.push(Q.all([
-          descPromise,
+          descObjPromise,
           readmePromise
-        ]).spread((desc, readme) => {
-          return new PmpPluginDescriptor(packageName, desc, readme);
+        ]).spread((descObj, readme) => {
+          let desc = (descObj.description) ? descObj.description : '';
+          let jsHelp = (descObj.documentation && descObj.documentation.jsHelpers) ? descObj.documentation.jsHelpers : [];
+          let htmlHelp = (descObj.documentation && descObj.documentation.htmlHelpers) ? descObj.documentation.htmlHelpers : [];
+          return new PmpPluginDescriptor(packageName, desc, readme, jsHelp, htmlHelp);
       }));
     });
 
