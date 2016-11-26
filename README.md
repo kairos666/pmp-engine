@@ -46,6 +46,7 @@ let config = {
             cookies: { stripeDomain: false }
         },
         port:3000,
+        cors:true,
         serveStatic: ['./dist'],
         middleware: [],
         rewriteRules: []
@@ -56,6 +57,7 @@ let config = {
             modifs:[`
                 $('head').append('<link rel="stylesheet" type="text/css" href="/css/main.min.css">');
                 $('body').append('<script type="text/javascript" src="/js/main.min.js"></script>');
+                /* the 2 lines above can be replaced by using the staples helper plugin */
                 $('body').addClass('sample-pimping');
                 $('.Article-content p').html('my crazy lorem replacement');
             `] 
@@ -69,6 +71,9 @@ let config = {
                 $('.Article-content').prepend('<img width="100%" src="http://i223.photobucket.com/albums/dd245/2ndsite/The%20Holding%20Pen/6f158ba2.jpg" />');
             `] 
         }
+    ],
+    plugins: [
+        'pmp-plugin-staples'
     ]
 };
 
@@ -82,6 +87,7 @@ property | values
 ------------ | -------------
 target | the proxied URL or host [String]
 port | the output port number [Number]
+cors | enables cross origin request headers [Boolean]
 ### Config pimpCmds 
 Set of rules to be applied when the page's URL match a specific pattern. This is an array that contains pimp commands.
 
@@ -109,6 +115,16 @@ modifs:[
     "$('body').append('<script type=\"text/javascript\" src=\"/js/main.min.js\"></script>');",
     "$('body').addClass('sample-pimping');"
 ]
+```
+
+### Config plugins
+Set of pmp-plugins to be applied as helpers (need to be npm installed before use). A plugin provide functions for easing the writing of modification rules, it also provides helper custom tags for your custom HTML templates.
+Just put packages names in an array under the **plugins** config field.
+
+## Usage (standalone)
+If you wanne use the engine without coding around it.
+```console
+npm start
 ```
 
 ## Usage
@@ -247,9 +263,3 @@ This functionnality will be leveraged in an upcoming pmp-ui package
 * need some tests certainly some weird behaviors now and then :hear_no_evil:
 * cross domains problems when dealing with https sites. This is baked in security for any browser, may be bypassed by extensions such has [this one](https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi?utm_source=chrome-app-launcher-info-dialog) ... beware this is dangerous :bangbang:
 * because the modifications are applied on the fly in the HTML page request, it will work only with good ol' full server rendered pages. Pimping SPAs or ajax content need some reverse engineering at best, or is plain impossible.
-
-## future features
-- [x] test coverage (v2.0.0)
-- [x] socket server to remotely control pmp-engine (v2.0.0)
-- [ ] plugin system to import DOM manipulation helper functions to power-up the pimpCmds (ex:injectHTML function)
-- [ ] pmp-ui, GUI to make pmp-engine usage a breeze
