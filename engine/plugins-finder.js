@@ -87,6 +87,10 @@ let getAvailablePmpPluginsPromise = (pluginNamePattern) => {
     let filteredPackageArray = packageArray.filter(pack => (pack.indexOf(pluginNamePattern) === 0));
 
     return filteredPackageArray;
+  }).catch(err => {
+    console.error(`exec error: ${err}`);
+
+    return [];
   });
 
   // CHAIN 2 - resolve description/readme
@@ -112,7 +116,11 @@ let getAvailablePmpPluginsPromise = (pluginNamePattern) => {
   });
 
   // execute promise start
-  exec('npm ls --json', function(err, stdout, stderr) {
+  exec('npm ls --json', { cwd: process.cwd(), maxBuffer: 1024 * 500 }, function(err, stdout, stderr) {
+    if (err) { 
+      deferredPluginList.reject(err);
+      return;
+    }
     deferredPluginList.resolve(JSON.parse(stdout));
   });
 

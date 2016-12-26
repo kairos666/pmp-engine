@@ -175,6 +175,8 @@ if(isStandAlone) {
 
         pmpEngine.availablePluginsPromise.then(availablePlugins => {
             console.log('available plugins: ', availablePlugins);
+        }).catch(err => {
+            console.log(err);
         });
     }
 };
